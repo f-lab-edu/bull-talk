@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: websocket-service
+server:
+  port: 9003
