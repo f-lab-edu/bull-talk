@@ -17,4 +17,12 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            echo 'Build and deployment succeeded!'
+        }
+        failure {
+            echo 'Build or deployment failed!'
+        }
+    }
 }
