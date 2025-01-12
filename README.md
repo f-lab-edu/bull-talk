@@ -3,7 +3,7 @@
 주식장에서 실시간 채팅을 열어 주식에 대해 이야기 나누는 플랫폼. 
 
 ## 서버 구조
-<img width="904" alt="image" src="https://github.com/user-attachments/assets/54728a42-9925-45c8-b758-511785bedad4" />
+
 
 ## 프로젝트 목표
 BullTalk 프로젝트는 주식 데이터를 기반으로 한 실시간 채팅 및 데이터 예측 플랫폼을 개발하는 것을 목표로 합니다.
