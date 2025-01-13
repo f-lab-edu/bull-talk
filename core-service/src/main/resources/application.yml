@@ -1,5 +1,0 @@
-spring:
-  application:
-    name: core-service
-server:
-  port: 9002

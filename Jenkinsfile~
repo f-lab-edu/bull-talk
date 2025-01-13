@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'bull-talk-docker-image'  // Docker 이미지 이름
         DOCKER_TAG = "latest"  // 이미지 태그
+        DOCKER_REGISTRY = 'bull-talk-docker' // Docker Registry URL (예: Docker Hub)
     }
 
     stages {
@@ -18,15 +19,26 @@ pipeline {
             steps {
                 script {
                     // Docker 이미지 빌드
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Docker 레지스트리에 푸시
+                    sh "docker login -u your-username -p your-password ${DOCKER_REGISTRY}"
+                    sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
                     // 배포 관련 스크립트 (예: 새로운 Docker 컨테이너 실행)
-                    sh "docker run -d --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    sh "docker run -d --name ${DOCKER_IMAGE} ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
         }
