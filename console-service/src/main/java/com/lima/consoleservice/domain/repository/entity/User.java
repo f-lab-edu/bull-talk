@@ -30,6 +30,7 @@ public class User {
   private Long userId;
 
   @Column
+  @Setter
   private String name;
 
   @Column(nullable = false)

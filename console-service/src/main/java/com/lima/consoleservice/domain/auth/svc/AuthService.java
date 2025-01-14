@@ -1,9 +1,9 @@
 package com.lima.consoleservice.domain.auth.svc;
 
+import com.lima.consoleservice.common.constants.ResponseConstants;
 import com.lima.consoleservice.domain.auth.model.request.CreateUserRequest;
 import com.lima.consoleservice.domain.auth.model.request.UpdateUserRequest;
-import com.lima.consoleservice.domain.auth.model.response.CreateUserResponse;
-import com.lima.consoleservice.domain.auth.model.response.UpdateUserResponse;
+import com.lima.consoleservice.domain.auth.model.response.AuthResponse;
 import com.lima.consoleservice.domain.repository.UserRepository;
 import com.lima.consoleservice.domain.repository.entity.User;
 import com.lima.consoleservice.domain.repository.entity.UserCredentials;
@@ -16,6 +16,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -26,7 +27,8 @@ public class AuthService {
   private final Hasher hasher;
 
 
-  public CreateUserResponse createUser(@Valid CreateUserRequest request) {
+  @Transactional
+  public AuthResponse createUser(@Valid CreateUserRequest request) {
     // email을 이용하여 유저가 존재하는지 확인.
     Optional<User> user = userRepository.findByEmail(request.email());
 
@@ -41,15 +43,8 @@ public class AuthService {
     UserCredentials userCredentials = this.newUserCredentials(request.password(), newUser);
     newUser.setUserCredentials(userCredentials);
 
-    User saveUser = userRepository.save(newUser);
-
-    if (saveUser == null) {
-      log.error("CREATE_USER_FAILED: {}", request.email());
-      // 커스텀 Exception을 사용해봐야겠다.
-      throw new RuntimeException("CREATE_USER_FAILED");
-    }
-
-    return new CreateUserResponse(request.email());
+    userRepository.save(newUser);
+    return new AuthResponse(ResponseConstants.SUCCESS, request.email());
   }
 
   private UserCredentials newUserCredentials(@NotBlank @NotNull String password, User newUser) {
@@ -67,10 +62,24 @@ public class AuthService {
         .build();
   }
 
-  public UpdateUserResponse updateUser(Long userId, @Valid UpdateUserRequest request) {
+  @Transactional
+  public AuthResponse updateUser(Long userId, @Valid UpdateUserRequest request) {
     // 유저가 존재하는지 확인
-
+    User user = getUser(userId);
+    user.setName(request.name());
     // 유저 업데이트
-    return null;
+    userRepository.save(user);
+    return new AuthResponse(ResponseConstants.SUCCESS, user.getName());
+  }
+
+  public AuthResponse deleteUser(Long userId) {
+    getUser(userId);
+    userRepository.deleteById(userId);
+    return new AuthResponse(ResponseConstants.SUCCESS);
+  }
+
+  private User getUser(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
   }
 }
