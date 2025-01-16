@@ -1,9 +1,11 @@
-package com.lima.consoleservice.utils.security;
+package com.lima.consoleservice.config;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Hasher {
 
   private static final String HASHING_ALGORITHM = "SHA-256";
