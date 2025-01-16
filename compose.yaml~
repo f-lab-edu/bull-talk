@@ -17,21 +17,20 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - elk_network
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
-    container_name: elasticsearch2
-    ports:
-      - "9201:9200"  # HTTP API
-      - "9301:9300"  # 클러스터 통신
-    environment:
-      - discovery.seed_hosts=elasticsearch1:9300  # 첫 번째 서버를 알 수 있도록 설정
-      - cluster.name=bt-cluster  # 동일한 클러스터 이름
-      - node.name=elasticsearch2  # 두 번째 서버 이름
-      - xpack.security.enabled=false  # 보안 비활성화
-      - ES_JAVA_OPTS=-Xms2g -Xmx2g
-    networks:
-      - elk_network
-      -
+#  elasticsearch2:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+#    container_name: elasticsearch2
+#    ports:
+#      - "9201:9200"  # HTTP API
+#      - "9301:9300"  # 클러스터 통신
+#    environment:
+#      - discovery.seed_hosts=elasticsearch1:9300  # 첫 번째 서버를 알 수 있도록 설정
+#      - cluster.name=bt-cluster  # 동일한 클러스터 이름
+#      - node.name=elasticsearch2  # 두 번째 서버 이름
+#      - xpack.security.enabled=false  # 보안 비활성화
+#      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+#    networks:
+#      - elk_network
   # Kibana 추가
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.3
