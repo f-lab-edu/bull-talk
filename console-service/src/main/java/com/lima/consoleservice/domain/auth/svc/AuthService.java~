@@ -92,7 +92,7 @@ public class AuthService {
   }
 
   public String getCurrentUserEmail() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Authentication authentication = SecurityontextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.isAuthenticated()) {
       return String.valueOf(authentication.getPrincipal());
     }

@@ -46,8 +46,8 @@ public class AuthControllerV1 {
       summary = "로그아웃 처리",
       description = "로그아웃을 진행 한다.."
   )
-  @GetMapping("/logout")
-  public AuthResponse logout(Long userId) {
+  @PostMapping("/logout")
+  public AuthResponse logout(@PathVariable Long userId) {
     return authService.logout(userId);
   }
 }
