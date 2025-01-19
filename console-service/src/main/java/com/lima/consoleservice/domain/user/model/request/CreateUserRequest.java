@@ -1,4 +1,4 @@
-package com.lima.consoleservice.domain.auth.model.request;
+package com.lima.consoleservice.domain.user.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

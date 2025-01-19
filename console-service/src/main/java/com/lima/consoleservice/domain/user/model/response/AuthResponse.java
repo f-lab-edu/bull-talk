@@ -1,4 +1,4 @@
-package com.lima.consoleservice.domain.auth.model.response;
+package com.lima.consoleservice.domain.user.model.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.lang.Nullable;

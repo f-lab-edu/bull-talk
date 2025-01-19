@@ -1,12 +1,12 @@
-package com.lima.consoleservice.domain.auth.svc;
+package com.lima.consoleservice.domain.user.service;
 
 import com.lima.consoleservice.common.exception.BullTalkException;
 import com.lima.consoleservice.common.exception.ErrorCode;
 import com.lima.consoleservice.config.security.JwtTokenProvider;
-import com.lima.consoleservice.domain.auth.model.request.CreateUserRequest;
-import com.lima.consoleservice.domain.auth.model.request.LoginUserRequest;
-import com.lima.consoleservice.domain.auth.model.request.UpdateUserRequest;
-import com.lima.consoleservice.domain.auth.model.response.AuthResponse;
+import com.lima.consoleservice.domain.user.model.request.CreateUserRequest;
+import com.lima.consoleservice.domain.user.model.request.LoginUserRequest;
+import com.lima.consoleservice.domain.user.model.request.UpdateUserRequest;
+import com.lima.consoleservice.domain.user.model.response.AuthResponse;
 import com.lima.consoleservice.domain.repository.UserRepository;
 import com.lima.consoleservice.domain.repository.entity.User;
 import com.lima.consoleservice.domain.repository.entity.UserCredentials;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class UserService {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final RedisTemplate<String, Object> redisTemplate;
@@ -119,5 +119,26 @@ public class AuthService {
       throw new BullTalkException(ErrorCode.NOT_MATCH_USER);
     }
     return user;
+  }
+
+  @Transactional
+  public AuthResponse updateUser(Long userId, @Valid UpdateUserRequest request) {
+    User user = getCurrentUser(userId);
+
+    user.setName(request.name());
+    // 유저 업데이트
+    userRepository.save(user);
+    return new AuthResponse(ErrorCode.SUCCESS.getMessage(), user.getName());
+  }
+
+  public AuthResponse deleteUser(Long userId) {
+    getCurrentUser(userId);
+    userRepository.deleteById(userId);
+    return new AuthResponse(ErrorCode.SUCCESS.getMessage());
+  }
+
+  private User getUser(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new BullTalkException(ErrorCode.NOT_EXIST_USER));
   }
 }
