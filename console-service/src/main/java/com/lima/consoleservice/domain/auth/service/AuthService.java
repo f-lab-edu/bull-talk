@@ -1,4 +1,4 @@
-package com.lima.consoleservice.domain.auth.svc;
+package com.lima.consoleservice.domain.auth.service;
 
 import com.lima.consoleservice.common.constants.ResponseConstants;
 import com.lima.consoleservice.domain.auth.model.request.CreateUserRequest;
@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,8 +30,13 @@ public class AuthService {
   @Transactional
   public AuthResponse createUser(@Valid CreateUserRequest request) {
     // email을 이용하여 유저가 존재하는지 확인.
-    System.out.println("request >> " + request);
-    userRepository.findByEmail(request.email()).orElseThrow(() -> new RuntimeException("USER_ALREADY_EXISTS"));
+    Optional<User> user = userRepository.findByEmail(request.email());
+
+    if (user.isPresent()) {
+      log.error("USER_ALREADY_EXISTS: {}", request.email());
+      // 커스텀 Exception을 사용해봐야겠다.
+      throw new RuntimeException("USER_ALREADY_EXISTS");
+    }
 
     // 없으면 새로 생성
     User newUser = this.newUser(request.email(), request.name());

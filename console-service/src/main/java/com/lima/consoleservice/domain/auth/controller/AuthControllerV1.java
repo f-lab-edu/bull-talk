@@ -1,9 +1,9 @@
-package com.lima.consoleservice.domain.auth.ctl;
+package com.lima.consoleservice.domain.auth.controller;
 
 import com.lima.consoleservice.domain.auth.model.request.CreateUserRequest;
 import com.lima.consoleservice.domain.auth.model.request.UpdateUserRequest;
 import com.lima.consoleservice.domain.auth.model.response.AuthResponse;
-import com.lima.consoleservice.domain.auth.svc.AuthService;
+import com.lima.consoleservice.domain.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
