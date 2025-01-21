@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
   private final UserRepository userRepository;
-  private final Hasher hasher;
 
+  public Hasher sha256Hasher() {
+    return new Hasher("SHA-256");
+  }
 
   @Transactional
   public AuthResponse createUser(@Valid CreateUserRequest request) {
@@ -50,7 +53,7 @@ public class AuthService {
   private UserCredentials newUserCredentials(@NotBlank @NotNull String password, User newUser) {
     return UserCredentials.builder()
         .user(newUser)
-        .hashedPassword(hasher.getHashingValue(password))
+        .hashedPassword(sha256Hasher().getHashingValue(password))
         .build();
   }
 
