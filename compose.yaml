@@ -90,4 +90,3 @@ networks:
     driver: bridge
   elk_network:
     driver: bridge
-
