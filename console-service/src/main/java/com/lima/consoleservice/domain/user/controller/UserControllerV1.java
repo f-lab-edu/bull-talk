@@ -71,3 +71,4 @@ public class UserControllerV1 {
     return userService.deleteUser(userId);
   }
 }
+
