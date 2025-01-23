@@ -1,14 +1,21 @@
+server:
+  port: 9001
+
 spring:
   application:
     name: console-service
+#  security:
+#    user:
+#      name: btuser
+#      password: 1016
   datasource:
     url: jdbc:postgresql://localhost:5432/btrdb
     username: btuser
     password: 1016
     driver-class-name: org.postgresql.Driver
-#  jpa:
-#    hibernate:
-#      ddl-auto: update # ?????? ?? ? ???? ???? ??/?????? ??
-#    show-sql: true # SQL ??? ??? ???? ??
-server:
-  port: 9001
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
