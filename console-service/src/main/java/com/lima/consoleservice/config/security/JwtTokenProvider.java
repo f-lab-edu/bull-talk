@@ -57,3 +57,4 @@ public class JwtTokenProvider {
     return (email.equals(extractEmail(token)) && !isTokenExpired(token));
   }
 }
+
