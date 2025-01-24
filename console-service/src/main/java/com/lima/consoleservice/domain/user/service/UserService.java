@@ -2,6 +2,7 @@ package com.lima.consoleservice.domain.user.service;
 
 import com.lima.consoleservice.common.exception.BullTalkException;
 import com.lima.consoleservice.common.exception.ErrorCode;
+import com.lima.consoleservice.config.Hasher;
 import com.lima.consoleservice.config.security.JwtTokenProvider;
 import com.lima.consoleservice.domain.user.model.request.CreateUserRequest;
 import com.lima.consoleservice.domain.user.model.request.LoginUserRequest;
@@ -10,7 +11,6 @@ import com.lima.consoleservice.domain.user.model.response.AuthResponse;
 import com.lima.consoleservice.domain.repository.UserRepository;
 import com.lima.consoleservice.domain.repository.entity.User;
 import com.lima.consoleservice.domain.repository.entity.UserCredentials;
-import com.lima.consoleservice.config.Hasher;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +33,10 @@ public class UserService {
   private final JwtTokenProvider jwtTokenProvider;
   private final RedisTemplate<String, Object> redisTemplate;
   private final UserRepository userRepository;
-  private final Hasher hasher;
+
+  public Hasher sha256Hasher() {
+    return new Hasher("SHA-256");
+  }
 
   @Transactional
   public AuthResponse createUser(@Valid CreateUserRequest request) {
@@ -57,7 +60,7 @@ public class UserService {
   private UserCredentials newUserCredentials(@NotBlank @NotNull String password, User newUser) {
     return UserCredentials.builder()
         .user(newUser)
-        .hashedPassword(hasher.getHashingValue(password))
+        .hashedPassword(sha256Hasher().getHashingValue(password))
         .build();
   }
 
@@ -76,7 +79,7 @@ public class UserService {
       throw new BullTalkException(ErrorCode.NOT_EXIST_USER);
     }
     user.map(u -> {
-      String hashingValue = hasher.getHashingValue(request.password());
+      String hashingValue = sha256Hasher().getHashingValue(request.password());
 
       // 비밀번호가 일치하지 않는다면.
       if (!u.getUserCredentials().getHashedPassword().equals(hashingValue)) {
@@ -135,10 +138,5 @@ public class UserService {
     getCurrentUser(userId);
     userRepository.deleteById(userId);
     return new AuthResponse(ErrorCode.SUCCESS.getMessage());
-  }
-
-  private User getUser(Long userId) {
-    return userRepository.findById(userId)
-        .orElseThrow(() -> new BullTalkException(ErrorCode.NOT_EXIST_USER));
   }
 }

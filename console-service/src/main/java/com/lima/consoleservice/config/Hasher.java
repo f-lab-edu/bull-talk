@@ -5,14 +5,17 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import org.springframework.stereotype.Service;
 
-@Service
 public class Hasher {
 
-  private static final String HASHING_ALGORITHM = "SHA-256";
+  private String hashingAlgorithm;
+
+  public Hasher(String hashingAlgorithm) {
+    this.hashingAlgorithm = hashingAlgorithm;
+  }
 
   public String getHashingValue(String password) {
     try {
-      MessageDigest digest = MessageDigest.getInstance(HASHING_ALGORITHM);
+      MessageDigest digest = MessageDigest.getInstance(hashingAlgorithm);
       byte[] hash = digest.digest(password.getBytes());
       return Base64.getEncoder().encodeToString(hash);
     } catch (NoSuchAlgorithmException e) {
