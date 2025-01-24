@@ -47,3 +47,4 @@ public class UserCredentials implements Serializable {
     return Objects.hash(user, hashedPassword);
   }
 }
+
