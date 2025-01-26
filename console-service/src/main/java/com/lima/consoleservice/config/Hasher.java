@@ -1,4 +1,4 @@
-package com.lima.consoleservice.utils.security;
+package com.lima.consoleservice.config;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -9,8 +9,8 @@ public class Hasher {
 
   private String hashingAlgorithm;
 
-  public Hasher(String algorithm) {
-    this.hashingAlgorithm = algorithm;
+  public Hasher(String hashingAlgorithm) {
+    this.hashingAlgorithm = hashingAlgorithm;
   }
 
   public String getHashingValue(String password) {
@@ -23,3 +23,4 @@ public class Hasher {
     }
   }
 }
+

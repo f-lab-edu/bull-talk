@@ -4,10 +4,10 @@ server:
 spring:
   application:
     name: console-service
-#  security:
-#    user:
-#      name: btuser
-#      password: 1016
+  security:
+    user:
+      name: btuser
+      password: 1016
   datasource:
     url: jdbc:postgresql://localhost:5432/btrdb
     username: btuser
@@ -19,3 +19,12 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+jwt:
+  secret-key: "SECRET"
+  refresh-secret-key: "REFRESH_SECRET"
+  token-time: 3600 # 1 hour
+  refresh-token-time: 300
