@@ -1,9 +1,8 @@
-package com.lima.consoleservice.config;
+package com.lima.consoleservice.config.security;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import org.springframework.stereotype.Service;
 
 public class Hasher {
 

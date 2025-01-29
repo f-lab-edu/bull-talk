@@ -27,7 +27,9 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // redis
@@ -47,6 +49,9 @@ dependencies {
 
     // DB
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
+
+    // Connect http
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
 
     // TEST
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

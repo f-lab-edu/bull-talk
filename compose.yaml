@@ -82,6 +82,7 @@ services:
     networks:
       - jenkins_network
 
+# Cerebro - 엘라스칙 서치 클러스터의 상태 확인과 관리를 도와주는 서드파티 솔루션.
 volumes:
   jenkins_home:
   elasticsearch-data:
