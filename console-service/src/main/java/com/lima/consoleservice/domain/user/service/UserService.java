@@ -2,7 +2,7 @@ package com.lima.consoleservice.domain.user.service;
 
 import com.lima.consoleservice.common.exception.BullTalkException;
 import com.lima.consoleservice.common.exception.ErrorCode;
-import com.lima.consoleservice.config.Hasher;
+import com.lima.consoleservice.config.security.Hasher;
 import com.lima.consoleservice.config.security.JwtTokenProvider;
 import com.lima.consoleservice.domain.user.model.request.CreateUserRequest;
 import com.lima.consoleservice.domain.user.model.request.LoginUserRequest;
