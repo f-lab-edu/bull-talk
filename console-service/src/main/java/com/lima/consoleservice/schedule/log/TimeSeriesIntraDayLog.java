@@ -51,7 +51,7 @@ public class TimeSeriesIntraDayLog implements Job {
     }
   }
 
-  private void connectIntraDayHttp(JobExecutionContext context, HttpUrl.Builder url) {
+  public void connectIntraDayHttp(JobExecutionContext context, HttpUrl.Builder url) {
     HttpUrl httpUrl = url.build();
     try(Response response = connection.getOkHttpClient().newCall(new Request.Builder().url(httpUrl).build()).execute()) {
       if (response.isSuccessful()) {
