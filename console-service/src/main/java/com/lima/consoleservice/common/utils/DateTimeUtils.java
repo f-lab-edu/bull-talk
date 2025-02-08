@@ -13,8 +13,11 @@ public class DateTimeUtils {
 
   public static String getNowStandardTime() {
     LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(STANDARD_DATE_TIME_FORMAT);
+    return formatDateTime(now, STANDARD_DATE_TIME_FORMAT); // 기본 포맷 사용
+  }
 
-    return now.format(formatter);
+  public static String formatDateTime(LocalDateTime dateTime, String format) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+    return dateTime.format(formatter);
   }
 }
