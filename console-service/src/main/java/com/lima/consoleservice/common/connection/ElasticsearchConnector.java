@@ -3,24 +3,22 @@ package com.lima.consoleservice.common.connection;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.elasticsearch.core.bulk.IndexOperation;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Component
 @Slf4j
@@ -60,7 +58,10 @@ public class ElasticsearchConnector {
 
       for (String jsonData : jsonDataList) {
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> jsonMap = objectMapper.readValue(jsonData, Map.class);
+        Map<String, Object> jsonMap = objectMapper.readValue(
+            jsonData, new TypeReference<Map<String, Object>>() {}
+        );
+
 
         // IndexOperation 객체를 생성 한다
         IndexOperation<Object> indexOp = IndexOperation.of(op -> op

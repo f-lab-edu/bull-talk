@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "nebula.lint" version "17.8.0"
+    id "nebula.lint" version "20.1.0"
 }
 
 group = 'com.lima'
@@ -52,8 +52,8 @@ dependencies {
 
     // Elasticsearch
     implementation 'org.elasticsearch:elasticsearch:8.17.1'
-    implementation("co.elastic.clients:elasticsearch-java:8.12.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation 'co.elastic.clients:elasticsearch-java:8.12.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     // Connect http
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
 
@@ -65,5 +65,5 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-gradleLint.rules = ['all-dependency'] // add as many rules here as you'd like
+gradleLint.rules -= 'unused-dependency' // add as many rules here as you'd like
 
