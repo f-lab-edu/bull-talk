@@ -4,9 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum Symbol {
-  SYMBOL("symbol")
-  , AAPL("Apple")
-  , MSFT("Microsoft")
+  AAPL("Apple")
+//  , MSFT("Microsoft")
 //  , AMZN("Amazon")
 //  , GOOGL("Alphabet Class A")
 //  , GOOG("Alphabet Class C")

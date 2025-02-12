@@ -1,0 +1,9 @@
+현재 노드 상태 확인
+curl -X GET "http://localhost:9200/_cat/nodes?v"
+
+내 데이터가 어디 저장되었는지 확인하는 방법
+curl -X GET "http://localhost:9200/_cat/shards?v"
+
+GET /_cat/indices/
+GET /time_series_weekly/_search
+GET /time_series_weekly
