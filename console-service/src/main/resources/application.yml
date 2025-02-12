@@ -1,5 +1,7 @@
+api-key: "O4DHI459B5GRYIIX"
+
 server:
-  port: 9001
+  port: 8083
 
 spring:
   application:
