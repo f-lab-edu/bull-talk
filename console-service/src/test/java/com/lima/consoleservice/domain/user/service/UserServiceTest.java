@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.lima.consoleservice.common.exception.ErrorCode;
-import com.lima.consoleservice.config.Hasher;
+import com.lima.consoleservice.config.security.Hasher;
 import com.lima.consoleservice.config.security.JwtTokenProvider;
 import com.lima.consoleservice.domain.repository.UserRepository;
 import com.lima.consoleservice.domain.repository.entity.User;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
