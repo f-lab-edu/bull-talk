@@ -45,13 +45,10 @@ public class ElasticsearchConnector {
     this.client = new ElasticsearchClient(transport);
   }
 
-  /**
-   * 벌크 데이터 저장
-   */
   public synchronized BulkResponse bulkInsert(String index, List<String> jsonDataList) {
+    List<BulkOperation> operations = new ArrayList<>();
+    log.info("index: {}, insert start", index);
     try {
-      List<BulkOperation> operations = new ArrayList<>();
-
       if (jsonDataList.isEmpty()) {
         throw new IllegalArgumentException("jsonDataList cannot be empty");
       }
@@ -62,8 +59,6 @@ public class ElasticsearchConnector {
             jsonData, new TypeReference<Map<String, Object>>() {}
         );
 
-
-        // IndexOperation 객체를 생성 한다
         IndexOperation<Object> indexOp = IndexOperation.of(op -> op
             .index(index)
             .document(jsonMap)
@@ -73,7 +68,6 @@ public class ElasticsearchConnector {
         operations.add(BulkOperation.of(op -> op.index(indexOp)));  // BulkOperation 생성 시 인덱스 작업 추가
       }
 
-      // BulkRequest 객체 생성
       BulkRequest bulkRequest = BulkRequest.of(req -> req.operations(operations)  // 생성된 BulkOperation 목록 전달
       );
 

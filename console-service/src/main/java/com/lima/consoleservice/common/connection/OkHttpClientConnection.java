@@ -30,9 +30,7 @@ public class OkHttpClientConnection {
   }
 
   public HttpUrl.Builder buildParameters() {
-//    log.info("[time: " + DateTimeUtils.getNowStandardTime() + "] - url: " + URL);
     HttpUrl.Builder builder = Objects.requireNonNull(Objects.requireNonNull(HttpUrl.parse(URL))).newBuilder();
-    log.info("apiKey >>>>> " + apiKey);
     builder.addQueryParameter("apikey", apiKey);
     return builder;
   }
@@ -47,6 +45,8 @@ public class OkHttpClientConnection {
         parser.setIndex(index);
         parser.setTimeTitle(timeTitle);
         parser.dataParser(body);
+      } else {
+        log.info("emtpy log: {}", httpUrl);
       }
     } catch (IOException e) {
       log.error("Fail to connect: {}", url, e);

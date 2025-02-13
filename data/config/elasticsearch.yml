@@ -5,16 +5,6 @@ network.host: 0.0.0.0
 
 # Lucene 관련 설정
 path.data: /usr/share/elasticsearch/data
-index.refresh_interval: 1s
-index.number_of_shards: 3
-index.number_of_replicas: 1
-indices.query.cache.enabled: true
 
 # 메모리 최적화
 bootstrap.memory_lock: true
-ES_JAVA_OPTS: "-Xms2g -Xmx2g"
-
-# 느린 쿼리 로깅
-search.slowlog.threshold.query.warn: 2s
-search.slowlog.threshold.query.info: 1s
-search.slowlog.threshold.query.debug: 500ms

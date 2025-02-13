@@ -11,9 +11,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class StockDataParser {
 
   private final ElasticsearchConnector elasticsearchConnector;
@@ -28,6 +30,8 @@ public class StockDataParser {
 
   public void dataParser(String jsonString) {
     try {
+      log.info("Data Parsing Start");
+      System.out.println("뭐가 들어왔니");
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode rootNode = objectMapper.readTree(jsonString);
       String symbol = rootNode.path("Meta Data").path("2. Symbol").asText();
@@ -53,9 +57,12 @@ public class StockDataParser {
         jsonDataList.add(objectMapper.writeValueAsString(stockData));
       }
 
+      log.info("Data Parsing End");
       BulkResponse response = elasticsearchConnector.bulkInsert(index, jsonDataList);
       if (response.errors()) {
         throw new RuntimeException("Elasticsearch bulk insert failed");
+      } else {
+        log.info("Elasticsearch bulk insert success. size: " + jsonDataList.size());
       }
     } catch (IOException e) {
       throw new RuntimeException(e);

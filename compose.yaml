@@ -15,13 +15,7 @@ services:
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
       - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
-      # Lucene 관련 추가 설정
       - path.data=/usr/share/elasticsearch/data
-      - index.refresh_interval=1s  # 색인 주기 1초
-      - index.number_of_shards=3  # 샤드 개수 3개
-      - index.number_of_replicas=1  # 복제본 1개
-      - indices.query.cache.enabled=true  # 검색 쿼리 캐싱 활성화
-      - search.slowlog.threshold.query.warn=2s  # 느린 쿼리 로그 설정 (2초 이상)
     volumes:
       - elasticsearch-data1:/usr/share/elasticsearch/data
       - ./data/init:/usr/share/elasticsearch/init
@@ -33,6 +27,14 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
       interval: 10s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     depends_on:
       elasticsearch2:
         condition: service_healthy
