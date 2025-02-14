@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class ElasticsearchConnector {
+public class ElasticsearchConnection {
 
   private final ElasticsearchClient client;
   private final ElasticsearchTransport transport;
@@ -32,7 +32,7 @@ public class ElasticsearchConnector {
   private static final int ELASTICSEARCH_PORT = 9200;
   private String scheme = "http";
 
-  public ElasticsearchConnector() {
+  public ElasticsearchConnection() {
     this.restClient = RestClient.builder(
         new HttpHost(ELASTICSEARCH_HOST, ELASTICSEARCH_PORT, scheme)
     ).build();

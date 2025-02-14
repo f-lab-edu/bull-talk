@@ -2,18 +2,13 @@ package com.lima.consoleservice.logs;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import co.elastic.clients.elasticsearch.core.BulkResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lima.consoleservice.common.connection.ElasticsearchConnector;
+import com.lima.consoleservice.common.connection.ElasticsearchConnection;
 import com.lima.consoleservice.logs.model.StockData;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,8 +17,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -37,7 +30,7 @@ class StockDataParserTest {
   private StockDataParser stockDataParser;
 
   @Mock
-  private ElasticsearchConnector elasticsearchConnector;
+  private ElasticsearchConnection elasticsearchConnection;
 
   private String validJsonString;
 

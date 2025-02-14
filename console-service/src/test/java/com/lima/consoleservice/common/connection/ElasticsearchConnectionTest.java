@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -15,10 +14,8 @@ import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
 import co.elastic.clients.elasticsearch.core.bulk.OperationType;
-import co.elastic.clients.transport.ElasticsearchTransport;
 import java.io.IOException;
 import java.util.List;
-import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,13 +23,13 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ElasticsearchConnectorTest {
+class ElasticsearchConnectionTest {
 
   @Mock
   private ElasticsearchClient client;
 
   @InjectMocks
-  private ElasticsearchConnector elasticsearchConnector;
+  private ElasticsearchConnection elasticsearchConnection;
 
   private final String index = "time_series_intraday";
   private List<String> validJsonList;
@@ -68,7 +65,7 @@ class ElasticsearchConnectorTest {
         .build();
 
     doReturn(mockResponse).when(client).bulk(any(BulkRequest.class));
-    BulkResponse response = elasticsearchConnector.bulkInsert("time_series_intraday", validJsonList);
+    BulkResponse response = elasticsearchConnection.bulkInsert("time_series_intraday", validJsonList);
 
     assertNotNull(response);
     assertFalse(response.errors());
@@ -79,7 +76,7 @@ class ElasticsearchConnectorTest {
   void testBulkInsertInvalidJson() {
     RuntimeException exception = assertThrows(
         RuntimeException.class,
-        () -> elasticsearchConnector.bulkInsert(index, invalidJsonList)
+        () -> elasticsearchConnection.bulkInsert(index, invalidJsonList)
     );
 
     assertTrue(exception.getMessage().contains("Failed to perform bulk insert"));

@@ -3,7 +3,7 @@ package com.lima.consoleservice.logs;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lima.consoleservice.common.connection.ElasticsearchConnector;
+import com.lima.consoleservice.common.connection.ElasticsearchConnection;
 import com.lima.consoleservice.logs.model.StockData;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,14 +18,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class StockDataParser {
 
-  private final ElasticsearchConnector elasticsearchConnector;
+  private final ElasticsearchConnection elasticsearchConnection;
   @Setter
   private String index;
   @Setter
   private String timeTitle;
 
   public StockDataParser() {
-    this.elasticsearchConnector = new ElasticsearchConnector();
+    this.elasticsearchConnection = new ElasticsearchConnection();
   }
 
   public void dataParser(String jsonString) {
@@ -58,7 +58,7 @@ public class StockDataParser {
       }
 
       log.info("Data Parsing End");
-      BulkResponse response = elasticsearchConnector.bulkInsert(index, jsonDataList);
+      BulkResponse response = elasticsearchConnection.bulkInsert(index, jsonDataList);
       if (response.errors()) {
         throw new RuntimeException("Elasticsearch bulk insert failed");
       } else {
