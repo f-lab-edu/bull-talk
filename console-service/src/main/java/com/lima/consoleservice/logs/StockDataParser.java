@@ -31,7 +31,6 @@ public class StockDataParser {
   public void dataParser(String jsonString) {
     try {
       log.info("Data Parsing Start");
-      System.out.println("뭐가 들어왔니");
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode rootNode = objectMapper.readTree(jsonString);
       String symbol = rootNode.path("Meta Data").path("2. Symbol").asText();
