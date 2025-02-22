@@ -1,0 +1,10 @@
+# Elasticsearch 기본 설정
+cluster.name: bt-cluster
+node.name: elasticsearch1
+network.host: 0.0.0.0
+
+# Lucene 관련 설정
+path.data: /usr/share/elasticsearch/data
+
+# 메모리 최적화
+bootstrap.memory_lock: true

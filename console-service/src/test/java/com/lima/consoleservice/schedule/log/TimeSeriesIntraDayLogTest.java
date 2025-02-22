@@ -9,7 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.lima.consoleservice.config.OkHttpClientConnection;
+import com.lima.consoleservice.common.connection.OkHttpClientConnection;
 import com.lima.consoleservice.schedule.log.params.Symbol;
 import java.io.IOException;
 import okhttp3.HttpUrl.Builder;
@@ -78,19 +78,20 @@ class TimeSeriesIntraDayLogTest {
     when(connection.buildParameters()).thenReturn(mockBuilder);
     when(mockBuilder.addQueryParameter(anyString(), anyString())).thenReturn(mockBuilder);
 
-    // spyJob은 TimeSeriesIntraDayLog의 스파이 객체로, connectIntraDayHttp() 메소드가 실제로 호출되었는지, 몇 번 호출되었는지를 검증한다.
+    // spyJob은 TimeSeriesIntraDayLog의 스파이 객체로, connectAlphaVantage() 메소드가 실제로 호출되었는지, 몇 번 호출되었는지를 검증한다.
     TimeSeriesIntraDayLog spyJob = spy(job);
 
+    // OkHttpClientConnection의 connectAlphaVantage() 메소드가 IOException을 던지도록 설정
     doAnswer(invocation -> {
       throw new IOException("Test Exception");
-    }).when(spyJob).connectIntraDayHttp(any(), any());
+    }).when(connection).connectAlphaVantage(any(), any(), anyString());
 
     // When
     spyJob.execute(context);
 
     // Then
     verify(connection, times(Symbol.values().length)).buildParameters();
-    // any(), any()는 connectIntraDayHttp() 메소드에 전달된 인자들에 대해 특정 값이 아니라 인자 값이 무엇이든 상관없다는 의미로 사용된다.
-    verify(spyJob, times(Symbol.values().length)).connectIntraDayHttp(any(), any());
+    // any(), any()는 connectAlphaVantage() 메소드에 전달된 인자들에 대해 특정 값이 아니라 인자 값이 무엇이든 상관없다는 의미로 사용된다.
+    verify(connection, times(Symbol.values().length)).connectAlphaVantage(any(), any(), anyString());
   }
 }
