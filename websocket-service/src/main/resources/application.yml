@@ -1,5 +1,27 @@
+server:
+  port: 8084
+
 spring:
   application:
     name: websocket-service
-server:
-  port: 9002
+  security:
+    user:
+      name: btuser
+      password: 1016
+  datasource:
+    url: jdbc:postgresql://localhost:5432/btrdb
+    username: btuser
+    password: 1016
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+
