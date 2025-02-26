@@ -3,19 +3,17 @@ package com.lima.websocketservice.domain.chat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lima.websocketservice.domain.chat.model.ChatMessage;
 import com.lima.websocketservice.domain.chat.service.FluentBitService;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -23,20 +21,23 @@ import java.util.Set;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
   private final FluentBitService fluentBitService;
+  private final RedisTemplate<String, String> redisTemplate; // 값 타입을 String으로 변경
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  // roomId별 세션 관리
-  private final Map<Integer, Set<WebSocketSession>> roomSessions = Collections.synchronizedMap(new HashMap<>());
+  // 세션 ID와 WebSocketSession을 매핑하는 로컬 맵
+  private final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>();
+  private static final String ROOM_KEY_PREFIX = "chat:room:";
 
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
     super.afterConnectionEstablished(session);
-    // 쿼리 파라미터에서 roomId 추출
-    String query = session.getUri().getQuery();
-    int roomId = extractRoomId(query);
+    int roomId = extractRoomId(session.getUri().getQuery());
+    String roomKey = ROOM_KEY_PREFIX + roomId;
 
-    // roomId에 해당하는 세션 집합이 없으면 생성
-    roomSessions.computeIfAbsent(roomId, k -> Collections.synchronizedSet(new HashSet<>())).add(session);
+    // 세션 ID를 Redis에 저장
+    redisTemplate.opsForSet().add(roomKey, session.getId());
+    // 로컬 맵에 세션 객체 저장
+    sessionMap.put(session.getId(), session);
     log.info("New session connected to room {}: {}", roomId, session.getId());
   }
 
@@ -49,12 +50,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
       ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
       fluentBitService.sendToFluentBit(chatMessage);
 
-      // 해당 roomId의 세션에만 메시지 전송
       int roomId = chatMessage.getRoomId();
-      Set<WebSocketSession> sessionsInRoom = roomSessions.getOrDefault(roomId, Collections.emptySet());
-      for (WebSocketSession webSocketSession : sessionsInRoom) {
-        if (webSocketSession.isOpen()) {
-          webSocketSession.sendMessage(new TextMessage(payload));
+      String roomKey = ROOM_KEY_PREFIX + roomId;
+      Set<String> sessionIds = redisTemplate.opsForSet().members(roomKey);
+      if (sessionIds != null) {
+        for (String sessionId : sessionIds) {
+          WebSocketSession webSocketSession = sessionMap.get(sessionId);
+          if (webSocketSession != null && webSocketSession.isOpen()) {
+            webSocketSession.sendMessage(new TextMessage(payload));
+          }
         }
       }
     } catch (Exception e) {
@@ -64,19 +68,20 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    String query = session.getUri().getQuery();
-    int roomId = extractRoomId(query);
-    Set<WebSocketSession> sessionsInRoom = roomSessions.get(roomId);
-    if (sessionsInRoom != null) {
-      sessionsInRoom.remove(session);
-      if (sessionsInRoom.isEmpty()) {
-        roomSessions.remove(roomId); // 빈 방 제거
-      }
+    int roomId = extractRoomId(session.getUri().getQuery());
+    String roomKey = ROOM_KEY_PREFIX + roomId;
+
+    redisTemplate.opsForSet().remove(roomKey, session.getId());
+    sessionMap.remove(session.getId());
+
+    Long remainingSessions = redisTemplate.opsForSet().size(roomKey);
+    if (remainingSessions != null && remainingSessions == 0) {
+      // 빈 방 제거까지.
+      redisTemplate.delete(roomKey);
     }
     log.info("Session disconnected from room {}: {}", roomId, session.getId());
   }
 
-  // 쿼리에서 roomId 추출
   private int extractRoomId(String query) {
     if (query != null && query.startsWith("roomId=")) {
       try {
@@ -85,6 +90,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.error("Invalid roomId in query: {}", query);
       }
     }
-    return 0; // 기본값 (필요 시 예외 처리로 변경 가능)
+    return 0;
   }
 }

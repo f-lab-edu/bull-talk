@@ -17,9 +17,9 @@
       },
       "created_at": {
         "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss"
+        "format": "yyyy-MM-dd HH:mm:ss.SSS"
       },
-      "roomName": {
+      "room_name": {
         "type": "keyword"
       },
       "message_id": {
@@ -46,6 +46,9 @@
       "edited_at": {
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "@timestamp": {
+        "type": "date"
       }
     }
   }

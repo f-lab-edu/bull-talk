@@ -138,10 +138,11 @@ services:
     image: fluent/fluent-bit:latest
     container_name: fluent-bit
     ports:
-      - "9880:9880"  # HTTP Input을 위해 개방
+      - "9880:9880"
     volumes:
-      - ./data/config/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf  # 설정 파일 매핑
+      - ./data/config/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./data/config/parsers.conf:/fluent-bit/etc/parsers.conf
+    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
     networks:
       - elk_network
     depends_on:

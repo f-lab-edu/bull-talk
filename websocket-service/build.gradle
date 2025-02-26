@@ -40,6 +40,12 @@ dependencies {
     // DB
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
 
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.4.1'
+    // redis session
+    implementation 'org.springframework.session:spring-session-data-redis:3.4.1'
+
+
     // Elasticsearch
 //    implementation 'org.elasticsearch:elasticsearch:8.17.1'
 //    implementation 'co.elastic.clients:elasticsearch-java:8.12.0'
