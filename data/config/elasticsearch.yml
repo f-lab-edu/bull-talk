@@ -1,7 +1,15 @@
 # Elasticsearch 기본 설정
 cluster.name: bt-cluster
-node.name: elasticsearch1
+node.name: ${NODE_NAME}  # 동적으로 설정
 network.host: 0.0.0.0
+
+# 클러스터 설정
+discovery.seed_hosts:
+  - elasticsearch2:9300
+  - elasticsearch3:9300
+cluster.initial_master_nodes:
+  - elasticsearch2
+  - elasticsearch3
 
 # Lucene 관련 설정
 path.data: /usr/share/elasticsearch/data
