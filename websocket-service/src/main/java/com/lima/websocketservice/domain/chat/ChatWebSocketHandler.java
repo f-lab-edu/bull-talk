@@ -3,12 +3,16 @@ package com.lima.websocketservice.domain.chat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lima.websocketservice.domain.chat.model.ChatMessage;
 import com.lima.websocketservice.domain.chat.service.FluentBitService;
+import jakarta.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -21,10 +25,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
   private final FluentBitService fluentBitService;
-  private final RedisTemplate<String, String> redisTemplate; // 값 타입을 String으로 변경
+  private final RedisTemplate<String, String> redisTemplate;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final RedisMessageListenerContainer redisMessageListenerContainer;
 
-  // 세션 ID와 WebSocketSession을 매핑하는 로컬 맵
   private final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>();
   private static final String ROOM_KEY_PREFIX = "chat:room:";
 
@@ -34,10 +38,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     int roomId = extractRoomId(session.getUri().getQuery());
     String roomKey = ROOM_KEY_PREFIX + roomId;
 
-    // 세션 ID를 Redis에 저장
     redisTemplate.opsForSet().add(roomKey, session.getId());
-    // 로컬 맵에 세션 객체 저장
     sessionMap.put(session.getId(), session);
+
     log.info("New session connected to room {}: {}", roomId, session.getId());
   }
 
@@ -51,16 +54,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
       fluentBitService.sendToFluentBit(chatMessage);
 
       int roomId = chatMessage.getRoomId();
-      String roomKey = ROOM_KEY_PREFIX + roomId;
-      Set<String> sessionIds = redisTemplate.opsForSet().members(roomKey);
-      if (sessionIds != null) {
-        for (String sessionId : sessionIds) {
-          WebSocketSession webSocketSession = sessionMap.get(sessionId);
-          if (webSocketSession != null && webSocketSession.isOpen()) {
-            webSocketSession.sendMessage(new TextMessage(payload));
-          }
-        }
-      }
+      String channel = ROOM_KEY_PREFIX + roomId;
+      redisTemplate.convertAndSend(channel, payload); // Redis 채널에 메시지 게시
     } catch (Exception e) {
       log.error("Failed to process message", e);
     }
@@ -76,10 +71,34 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     Long remainingSessions = redisTemplate.opsForSet().size(roomKey);
     if (remainingSessions != null && remainingSessions == 0) {
-      // 빈 방 제거까지.
       redisTemplate.delete(roomKey);
+      log.info("Room {} removed as no sessions remain", roomId);
     }
     log.info("Session disconnected from room {}: {}", roomId, session.getId());
+  }
+
+  @PostConstruct
+  public void init() {
+    redisMessageListenerContainer.addMessageListener((message, pattern) -> {
+      String payload = new String(message.getBody());
+      String channel = new String(message.getChannel());
+      int roomId = Integer.parseInt(channel.split(":")[2]);
+      String roomKey = ROOM_KEY_PREFIX + roomId;
+
+      Set<String> sessionIds = redisTemplate.opsForSet().members(roomKey);
+      if (sessionIds != null) {
+        for (String sessionId : sessionIds) {
+          WebSocketSession ws = sessionMap.get(sessionId);
+          if (ws != null && ws.isOpen()) {
+            try {
+              ws.sendMessage(new TextMessage(payload));
+            } catch (IOException e) {
+              log.error("Failed to send message to session {}: {}", sessionId, e.getMessage());
+            }
+          }
+        }
+      }
+    }, new ChannelTopic(ROOM_KEY_PREFIX + "*"));
   }
 
   private int extractRoomId(String query) {

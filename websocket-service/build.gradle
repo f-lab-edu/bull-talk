@@ -45,12 +45,6 @@ dependencies {
     // redis session
     implementation 'org.springframework.session:spring-session-data-redis:3.4.1'
 
-
-    // Elasticsearch
-//    implementation 'org.elasticsearch:elasticsearch:8.17.1'
-//    implementation 'co.elastic.clients:elasticsearch-java:8.12.0'
-//    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
-
     // TEST
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
