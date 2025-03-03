@@ -112,7 +112,7 @@ class ChatWebSocketHandlerTest {
   @Test
   void testAfterConnectionClosed_RoomNotEmpty() throws Exception {
     // Arrange
-    URI uri = new URI("ws://localhost:8080/chat?roomId=3");
+    URI uri = new URI("ws://localhost:8084/chat?roomId=3");
     when(webSocketSession.getUri()).thenReturn(uri);
     when(webSocketSession.getId()).thenReturn("session789");
     when(setOperations.size("chat:room:3")).thenReturn(1L);
