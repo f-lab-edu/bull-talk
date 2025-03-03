@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket 채팅방</title>
+  <style>
+    #chat-box { width: 400px; height: 300px; border: 1px solid #ccc; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
+    #message-input { width: 300px; padding: 5px; }
+    button { padding: 5px 10px; }
+  </style>
+</head>
+<body>
+<h2>채팅방</h2>
+<input type="number" id="roomId" placeholder="채팅방 ID" value="1">
+<button onclick="connect()">연결</button>
+<button onclick="disconnect()">연결 끊기</button>
+<br><br>
+<div id="chat-box"></div>
+<input type="text" id="sender" placeholder="보내는 사람 이름" value="Alice">
+<input type="text" id="receiver" placeholder="받는 사람 이름" value="Bob">
+<br><br>
+<input type="text" id="message-input" placeholder="메시지를 입력하세요">
+<button onclick="sendMessage()">전송</button>
+
+<script>
+  let socket = null;
+
+  function connect() {
+    const roomId = document.getElementById('roomId').value;
+    if (!roomId) {
+      alert('채팅방 ID를 입력하세요!');
+      return;
+    }
+    socket = new WebSocket(`ws://localhost:8084/chat?roomId=${roomId}`);  // roomId를 쿼리로 전달
+
+    socket.onopen = function() {
+      console.log(`채팅방 ${roomId}에 연결 성공`);
+      alert(`채팅방 ${roomId}에 연결되었습니다!`);
+    };
+
+    socket.onmessage = function(event) {
+      const chatMessage = JSON.parse(event.data);
+      showMessage(chatMessage);
+    };
+
+    socket.onerror = function(error) {
+      console.error('연결 오류:', error);
+      alert('연결 실패: ' + error);
+    };
+
+    socket.onclose = function() {
+      console.log('연결 종료');
+      alert('채팅 서버와 연결이 끊겼습니다!');
+    };
+  }
+
+  function showMessage(chatMessage) {
+    const chatBox = document.getElementById('chat-box');
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = `<strong>${chatMessage.sender}</strong> -> ${chatMessage.receiver}: ${chatMessage.message} <small>(Room ${chatMessage.roomId}, ${new Date(chatMessage.timestamp).toLocaleTimeString()})</small>`;
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function sendMessage() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      alert('먼저 서버에 연결하세요!');
+      return;
+    }
+
+    const sender = document.getElementById('sender').value;
+    const receiver = document.getElementById('receiver').value;
+    const message = document.getElementById('message-input').value;
+    const roomId = document.getElementById('roomId').value;
+
+    if (message.trim() === '') {
+      alert('메시지를 입력하세요!');
+      return;
+    }
+
+    const chatMessage = {
+      sender: sender,
+      receiver: receiver,
+      message: message,
+      roomId: parseInt(roomId),  // 문자열 -> 정수 변환
+      timestamp: Date.now()
+    };
+
+    socket.send(JSON.stringify(chatMessage));
+    document.getElementById('message-input').value = '';
+  }
+
+  function disconnect() {
+    if (socket) {
+      socket.close();
+    }
+  }
+</script>
+</body>
+</html>
