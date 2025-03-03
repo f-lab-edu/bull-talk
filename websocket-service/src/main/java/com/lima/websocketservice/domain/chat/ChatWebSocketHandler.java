@@ -28,7 +28,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
   private final RedisTemplate<String, String> redisTemplate;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final RedisMessageListenerContainer redisMessageListenerContainer;
-
+  // 현재 연결된 모든 클라이언트의 WebSocket 세션 객체를 세션 ID와 매핑하여 저장
   private final Map<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>();
   private static final String ROOM_KEY_PREFIX = "chat:room:";
 
