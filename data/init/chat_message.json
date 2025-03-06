@@ -1,0 +1,55 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "sender": {
+        "type": "keyword"
+      },
+      "receiver": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "created_at": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss.SSS"
+      },
+      "room_name": {
+        "type": "keyword"
+      },
+      "message_id": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "message_type": {
+        "type": "keyword"
+      },
+      "sender_user_id": {
+        "type": "keyword"
+      },
+      "receiver_user_id": {
+        "type": "keyword"
+      },
+      "room_id": {
+        "type": "keyword"
+      },
+      "is_deleted": {
+        "type": "boolean"
+      },
+      "edited_at": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "@timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}
