@@ -14,7 +14,7 @@ services:
       - xpack.security.enabled=false
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
+      - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
       - bootstrap.memory_lock=true
     volumes:
       - elasticsearch-data1:/usr/share/elasticsearch/data
@@ -36,6 +36,8 @@ services:
     depends_on:
       elasticsearch2:
         condition: service_healthy
+      elasticsearch3:
+        condition: service_healthy
 
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
@@ -51,7 +53,7 @@ services:
       - xpack.security.enabled=false
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
+      - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
       - bootstrap.memory_lock=true
     volumes:
       - elasticsearch-data2:/usr/share/elasticsearch/data
@@ -83,7 +85,7 @@ services:
       - xpack.security.enabled=false
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
+      - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
       - bootstrap.memory_lock=true
     volumes:
       - elasticsearch-data3:/usr/share/elasticsearch/data
@@ -110,6 +112,10 @@ services:
       - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9200","http://elasticsearch3:9200"]
     networks:
       - elk_network
+    depends_on:
+      - elasticsearch1
+      - elasticsearch2
+      - elasticsearch3
 
   redis:
     image: redis:latest
