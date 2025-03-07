@@ -4,7 +4,6 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch1
     ports:
-      - "9200:9200"
       - "9300:9300"
     environment:
       - NODE_NAME=elasticsearch1
@@ -43,7 +42,6 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch2
     ports:
-      - "9201:9200"
       - "9301:9300"
     environment:
       - NODE_NAME=elasticsearch2
@@ -75,7 +73,6 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch3
     ports:
-      - "9202:9200"
       - "9302:9300"
     environment:
       - NODE_NAME=elasticsearch3
@@ -109,9 +106,11 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9200","http://elasticsearch3:9200"]
+      - ELASTICSEARCH_HOSTS=["http://nginx:9200"]  # Nginx로 연결
     networks:
       - elk_network
+    depends_on:
+      - nginx
 
   redis:
     image: redis:latest
@@ -131,10 +130,17 @@ services:
 
   nginx:
     image: nginx:latest
+    container_name: nginx_proxy
     ports:
-      - "80:80"
+      - "9200:9200"  # 호스트의 9200 포트로 통합 접근
     volumes:
-      - "./nginx.conf:/etc/nginx/nginx.conf:ro"
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - elk_network
+    depends_on:
+      - elasticsearch1
+      - elasticsearch2
+      - elasticsearch3
 
   jenkins:
     image: jenkins/jenkins:latest

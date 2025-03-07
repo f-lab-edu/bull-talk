@@ -34,7 +34,7 @@ public class ElasticsearchConnection {
   private final ElasticsearchTransport transport;
   private final RestClient restClient;
 
-  private static final String[] ELASTICSEARCH_HOSTS = {"localhost:9200", "localhost:9201", "localhost:9202"};
+  private static final String[] ELASTICSEARCH_HOSTS = {"localhost:9200"};
   private static final String SCHEME = "http";
   private static final int CONNECTION_TIMEOUT = 5000;
   private static final int SOCKET_TIMEOUT = 30000;
