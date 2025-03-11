@@ -1,8 +1,6 @@
 package com.lima.consoleservice.schedule;
 
 import com.lima.consoleservice.schedule.log.TimeSeriesIntraDayLog;
-import com.lima.consoleservice.schedule.log.TimeSeriesMonthlyLog;
-import com.lima.consoleservice.schedule.log.TimeSeriesWeeklyLog;
 import lombok.Getter;
 import org.quartz.Job;
 
