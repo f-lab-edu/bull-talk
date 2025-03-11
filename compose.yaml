@@ -1,40 +1,37 @@
-version: '3.8' #docker-compose 버전 지정
+version: '3.8'
 services:
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch1
     ports:
-      - "9200:9200"
       - "9300:9300"
     environment:
+      - NODE_NAME=elasticsearch1
       - discovery.seed_hosts=elasticsearch2:9300,elasticsearch3:9300
       - cluster.name=bt-cluster
-      - node.name=elasticsearch1
-      - node.roles=data
+      - node.roles=master,data # 마스터와 데이터 역할 모두 수행
       - xpack.security.enabled=false
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
-      - path.data=/usr/share/elasticsearch/data
+      - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3 # 모든 노드 포함
+      - bootstrap.memory_lock=true
     volumes:
       - elasticsearch-data1:/usr/share/elasticsearch/data
       - ./data/init:/usr/share/elasticsearch/init
       - ./data/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
       - elk_network
-    entrypoint: [ "/bin/bash", "-c", "/usr/share/elasticsearch/init/create_indices.sh && /usr/share/elasticsearch/bin/elasticsearch" ]
+    entrypoint: ["/bin/bash", "-c", "/usr/share/elasticsearch/init/create_indices.sh && /usr/share/elasticsearch/bin/elasticsearch"]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
       interval: 10s
       retries: 5
-    deploy:
-      resources:
-        limits:
-          memory: 4g
     ulimits:
       memlock:
         soft: -1
         hard: -1
+    cap_add:
+      - IPC_LOCK
     depends_on:
       elasticsearch2:
         condition: service_healthy
@@ -44,17 +41,27 @@ services:
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch2
+    ports:
+      - "9301:9300"
     environment:
+      - NODE_NAME=elasticsearch2
       - discovery.seed_hosts=elasticsearch1:9300,elasticsearch3:9300
       - cluster.name=bt-cluster
-      - node.name=elasticsearch2
-      - node.roles=master, data
+      - node.roles=master,data
       - xpack.security.enabled=false
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
+      - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
+      - bootstrap.memory_lock=true
     volumes:
       - elasticsearch-data2:/usr/share/elasticsearch/data
+      - ./data/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
     networks:
       - elk_network
     healthcheck:
@@ -65,17 +72,27 @@ services:
   elasticsearch3:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     container_name: elasticsearch3
+    ports:
+      - "9302:9300"
     environment:
+      - NODE_NAME=elasticsearch3
       - discovery.seed_hosts=elasticsearch1:9300,elasticsearch2:9300
       - cluster.name=bt-cluster
-      - node.name=elasticsearch3
-      - node.roles=master, data
+      - node.roles=master,data
       - xpack.security.enabled=false
       - ELASTIC_PASSWORD=1016
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.initial_master_nodes=elasticsearch2,elasticsearch3
+      - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
+      - bootstrap.memory_lock=true
     volumes:
       - elasticsearch-data3:/usr/share/elasticsearch/data
+      - ./data/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
     networks:
       - elk_network
     healthcheck:
@@ -83,24 +100,23 @@ services:
       interval: 10s
       retries: 5
 
-  # Kibana 추가
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.3
     container_name: kibana
     ports:
-      - "5601:5601"  # Kibana UI 접속 포트
+      - "5601:5601"
     environment:
-      - ELASTICSEARCH_HOSTS=["http://elasticsearch1:9200","http://elasticsearch2:9201"]
-#      - ELASTICSEARCH_USERNAME=btnosql
-#      - ELASTICSEARCH_PASSWORD=1016  # elastic 사용자의 비밀번호
+      - ELASTICSEARCH_HOSTS=["http://nginx:9200"]  # Nginx로 연결
     networks:
       - elk_network
+    depends_on:
+      - nginx
+
   redis:
     image: redis:latest
     container_name: redis
     ports:
       - "6379:6379"
-
 
   postgres:
     image: postgres:latest
@@ -114,23 +130,30 @@ services:
 
   nginx:
     image: nginx:latest
+    container_name: nginx_proxy
     ports:
-      - "80:80"
+      - "9200:9200"  # 호스트의 9200 포트로 통합 접근
     volumes:
-      - "./nginx.conf:/etc/nginx/nginx.conf:ro"
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - elk_network
+    depends_on:
+      - elasticsearch1
+      - elasticsearch2
+      - elasticsearch3
 
   jenkins:
     image: jenkins/jenkins:latest
     container_name: jenkins
     ports:
-      - "8080:8080"  # HTTP
-      - "8443:8443"  # HTTPS
-      - "50000:50000"  # Jenkins slave
+      - "8080:8080"
+      - "8443:8443"
+      - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home  # Jenkins 데이터 유지
-      - /var/run/docker.sock:/var/run/docker.sock  # Docker API 연동
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false" # 초기 설정 비활성화 (선택사황)
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
     networks:
       - jenkins_network
 
@@ -148,7 +171,6 @@ services:
     depends_on:
       - elasticsearch1
 
-# Cerebro - 엘라스칙 서치 클러스터의 상태 확인과 관리를 도와주는 서드파티 솔루션.
 volumes:
   jenkins_home:
   elasticsearch-data1:

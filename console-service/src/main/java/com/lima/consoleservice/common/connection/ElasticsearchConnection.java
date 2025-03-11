@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -28,21 +29,37 @@ public class ElasticsearchConnection {
   private final ElasticsearchTransport transport;
   private final RestClient restClient;
 
-  private static final String ELASTICSEARCH_HOST = "localhost";
-  private static final int ELASTICSEARCH_PORT = 9200;
-  private String scheme = "http";
+  private static final String[] ELASTICSEARCH_HOSTS = {"localhost:9200"};
+  private static final String SCHEME = "http";
+  private static final int CONNECTION_TIMEOUT = 5000;
+  private static final int SOCKET_TIMEOUT = 30000;
 
   public ElasticsearchConnection() {
-    this.restClient = RestClient.builder(
-        new HttpHost(ELASTICSEARCH_HOST, ELASTICSEARCH_PORT, scheme)
-    ).build();
-
-    this.transport = new RestClientTransport(
-        restClient,
-        new JacksonJsonpMapper()
-    );
-
+    RestClient initializedRestClient;
+    try {
+      initializedRestClient = initializeRestClient();
+    } catch (Exception e) {
+      log.error("Failed to initialize Elasticsearch RestClient", e);
+      throw new IllegalStateException("Cannot initialize Elasticsearch connection", e);
+    }
+    this.restClient = initializedRestClient;
+    this.transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
     this.client = new ElasticsearchClient(transport);
+  }
+
+  private RestClient initializeRestClient() {
+    HttpHost[] hosts = Arrays.stream(ELASTICSEARCH_HOSTS)
+        .map(host -> {
+          String[] parts = host.split(":");
+          return new HttpHost(parts[0], Integer.parseInt(parts[1]), SCHEME);
+        })
+        .toArray(HttpHost[]::new);
+
+    return RestClient.builder(hosts)
+        .setRequestConfigCallback(builder ->
+            builder.setConnectTimeout(CONNECTION_TIMEOUT)
+                .setSocketTimeout(SOCKET_TIMEOUT))
+        .build();
   }
 
   public synchronized BulkResponse bulkInsert(String index, List<String> jsonDataList) {

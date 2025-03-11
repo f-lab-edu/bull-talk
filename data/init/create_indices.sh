@@ -22,3 +22,4 @@ for file in "$INIT_DIR"/*.json; do
 
   echo "Index $index_name creation completed!"
 done
+
