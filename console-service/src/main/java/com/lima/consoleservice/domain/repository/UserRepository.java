@@ -1,7 +1,6 @@
 package com.lima.consoleservice.domain.repository;
 
 import com.lima.consoleservice.domain.repository.entity.User;
-import jakarta.persistence.Table;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

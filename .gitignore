@@ -174,3 +174,5 @@ gradle-app.setting
 *.java~
 
 *.iml
+*.yml~
+*.sh~

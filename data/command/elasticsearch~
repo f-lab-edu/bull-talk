@@ -1,6 +1,6 @@
 현재 노드 상태 확인
 curl -X GET "http://localhost:9200/_cat/nodes?v"
-샤드가 어디에 배치됐는지 볼 수 있어요.
+샤드가 어디에 배치됐는지 볼 수 있어요. 
 /_cat/shards
 my_index 0 p STARTED elasticsearch1, my_index 0 r STARTED elasticsearch2.
 내 데이터가 어디 저장되었는지 확인하는 방법
